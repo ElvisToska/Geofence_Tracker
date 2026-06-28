@@ -1,0 +1,49 @@
+plugins {
+    id "com.android.application"
+}
+
+import java.util.Properties
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { input ->
+        localProperties.load(input)
+    }
+}
+def mapsApiKey = localProperties.getProperty("MAPS_API_KEY", "")
+
+android {
+    namespace "com.example.geofenceapp"
+    compileSdk 34
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    defaultConfig {
+        applicationId "com.example.geofenceapp"
+        minSdk 23
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        resValue "string", "google_maps_key", mapsApiKey
+    }
+}
+
+dependencies {
+    implementation "androidx.annotation:annotation:1.8.2"
+    implementation "androidx.core:core:1.13.1"
+    implementation "androidx.fragment:fragment:1.8.2"
+    implementation "com.google.android.gms:play-services-location:21.3.0"
+    implementation "com.google.android.gms:play-services-maps:19.0.0"
+
+    testImplementation "junit:junit:4.13.2"
+
+    androidTestImplementation "androidx.test:core:1.6.0"
+    androidTestImplementation "androidx.test.ext:junit:1.2.1"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.6.1"
+    androidTestImplementation "androidx.test:rules:1.6.1"
+}

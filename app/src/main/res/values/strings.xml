@@ -1,0 +1,20 @@
+<resources>
+  <string name="app_name">Geofence_Tracker</string>
+  <string name="google_maps_key" translatable="false">REPLACE_ME_IN_LOCAL_PROPERTIES</string>
+  <string name="main_title">Geofence tracking</string>
+  <string name="main_subtitle">Create zones, start tracking, and review transitions on the map.</string>
+  <string name="main_status_ready">Ready to define an area</string>
+  <string name="main_status_needs_location">Location permission is required to start tracking.</string>
+  <string name="main_status_tracking">Tracking is enabled and ready to monitor movement.</string>
+  <string name="main_card_define">Define areas on map</string>
+  <string name="main_card_results">View results</string>
+  <string name="main_card_stop">Stop tracking</string>
+  <string name="map_hint_define">Long press to add or remove a 100m area.</string>
+  <string name="map_hint_results">Results show the latest session and its transitions.</string>
+  <string name="map_cancel">Cancel</string>
+  <string name="map_start">Start</string>
+  <string name="results_pause">Pause service</string>
+  <string name="results_resume">Resume service</string>
+  <string name="results_back">Back</string>
+  <string name="results_empty">No saved results yet.\nCreate a session and move in or out of the area to see markers here.</string>
+</resources>
