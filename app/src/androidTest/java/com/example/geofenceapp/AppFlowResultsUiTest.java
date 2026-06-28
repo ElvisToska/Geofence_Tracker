@@ -22,6 +22,9 @@ import androidx.test.rule.GrantPermissionRule;
 import androidx.test.rule.provider.ProviderTestRule;
 
 import com.example.geofenceapp.data.GeofenceContract;
+import com.example.geofenceapp.util.AuthManager;
+import com.example.geofenceapp.util.AuthSession;
+import com.example.geofenceapp.util.AppPrefs;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,6 +53,10 @@ public class AppFlowResultsUiTest {
     @Test
     public void mainScreenOpenResultsButtonNavigatesToResultsScreen() {
         ContentResolver resolver = providerRule.getResolver();
+        AppPrefs.clearAuth(androidx.test.core.app.ApplicationProvider.getApplicationContext());
+        AuthSession.clear();
+        AuthManager.signUp(androidx.test.core.app.ApplicationProvider.getApplicationContext(), "flowuser", "secure123");
+        AuthManager.login(androidx.test.core.app.ApplicationProvider.getApplicationContext(), "flowuser", "secure123");
         long sessionId = seedLatestSessionWithMovement(resolver);
 
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {

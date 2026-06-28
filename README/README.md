@@ -10,6 +10,7 @@ Full project documentation, diagrams, and screen-by-screen explanation:
 
 ## What it includes
 
+- `LoginActivity` / `SignupActivity` / `AdminActivity`: authentication flow, sign-up, sign-out, and admin user/pin management.
 - `MainActivity`: menu for defining areas, stopping tracking, and viewing results.
 - `MapActivity`: Google Map showing current location; long press adds a 100m circular area, long press inside an existing area removes it; `Start` creates a new session and starts tracking.
 - `GeofenceProvider`: SQLite-backed `ContentProvider` for sessions, selected areas, and enter/exit transition points.

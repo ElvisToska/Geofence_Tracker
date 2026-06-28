@@ -36,6 +36,15 @@
         </receiver>
 
         <activity
+            android:name=".AdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SignupActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
+        <activity
             android:name=".ResultsMapActivity"
             android:exported="false" />
         <activity

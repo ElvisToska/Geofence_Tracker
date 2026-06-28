@@ -293,6 +293,24 @@ erDiagram
     }
 ```
 
+### 5.4 Users
+
+Stores accounts. Fields: `_ID`, `username` (unique), `password_hash`, `password_salt`, `auth_token`, `role` (`admin`/`user`/`guest`), `created_at`. Passwords are stored only as a salted PBKDF2 hash.
+
+### 5.5 Pins
+
+Admin-assigned geofence points. Fields: `_ID`, `username` (owner), `label`, `latitude`, `longitude`, `radius_meters`, `active`, `created_at`.
+
+### 5.6 Accounts and Administration
+
+The application provides a username/password account system layered over the content provider.
+
+- `SignupActivity` / `LoginActivity` handle registration and login through `AuthManager` and `PasswordHasher`.
+- `AuthSession` holds the current user in memory; `AuthManager.restoreSession` re-loads it from `AppPrefs` on startup so data stays scoped to the correct user across process restarts.
+- `GeofenceProvider` filters every record by the logged-in username, isolating each user's data.
+- A seed administrator (`admin1404` / `admin1404`, role `admin`) is created by `GeofenceDatabase` and verified by `AuthManager.ensureSeedAdmin`.
+- `AdminActivity` is the administration screen: it adds/deletes users, assigns/removes geofence pins for a user, and lists all accounts. It is reachable only when the logged-in user has the admin role.
+
 ---
 
 ## Chapter 6. Diagrams
@@ -419,6 +437,7 @@ Validates:
 ### 7.2 Provider Tests
 
 - `GeofenceProviderTest`
+- `PinProviderTest`
 
 Validates:
 
@@ -427,8 +446,21 @@ Validates:
 - transition insertion
 - latest session queries
 - repeated movement behavior
+- pin insert/delete scoped to a user
 
-### 7.3 UI Flow Tests
+### 7.3 Account Tests
+
+- `AuthManagerTest`
+
+Validates:
+
+- the seed admin account exists and can log in with admin role
+- sign up, log in, and log out for a regular user
+- rejection of duplicate usernames, short passwords, and wrong passwords
+- a regular user is not granted admin access
+- session restore after a simulated process restart
+
+### 7.4 UI Flow Tests
 
 - `ResultsMapActivityTest`
 - `AppFlowResultsUiTest`

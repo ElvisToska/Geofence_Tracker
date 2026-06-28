@@ -15,6 +15,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.provider.ProviderTestRule;
 
 import com.example.geofenceapp.data.GeofenceContract;
+import com.example.geofenceapp.util.AuthManager;
+import com.example.geofenceapp.util.AuthSession;
+import com.example.geofenceapp.util.AppPrefs;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -37,6 +40,10 @@ public class ResultsMapActivityTest {
     @Test
     public void resultsScreenLaunchesAndShowsLatestSessionData() {
         ContentResolver resolver = providerRule.getResolver();
+        AppPrefs.clearAuth(androidx.test.core.app.ApplicationProvider.getApplicationContext());
+        AuthSession.clear();
+        AuthManager.signUp(androidx.test.core.app.ApplicationProvider.getApplicationContext(), "resultsuser", "secure123");
+        AuthManager.login(androidx.test.core.app.ApplicationProvider.getApplicationContext(), "resultsuser", "secure123");
         seedOlderSession(resolver);
         long latestSessionId = seedLatestSessionWithMovement(resolver);
 

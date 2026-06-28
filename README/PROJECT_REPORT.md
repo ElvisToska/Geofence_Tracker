@@ -209,6 +209,22 @@ erDiagram
     }
 ```
 
+### Users and Pins
+
+The accounts system adds two more tables. `Users` holds credentials and roles; `Pins` holds admin-assigned geofence points scoped to a user.
+
+Fields (`Users`): `_ID`, `username` (unique), `password_hash`, `password_salt`, `auth_token`, `role`, `created_at`.
+
+Fields (`Pins`): `_ID`, `username`, `label`, `latitude`, `longitude`, `radius_meters`, `active`, `created_at`.
+
+## 6b. Accounts & Administration
+
+The app supports per-user accounts with hashed passwords and an admin role.
+
+- **Authentication** — `SignupActivity` / `LoginActivity` collect a username and password. `PasswordHasher` stores passwords as a salted PBKDF2-WithHmacSHA256 hash (never plaintext). Login issues a random `auth_token`, persisted in `AppPrefs` and held in `AuthSession`.
+- **Session restore** — `AuthManager.restoreSession` (called from `MainActivity`) re-loads the saved session into `AuthSession` after a process restart so data stays scoped to the right user. `GeofenceProvider` filters all rows by the current username.
+- **Admin account** — A seed admin (`admin1404` / `admin1404`) is inserted by `GeofenceDatabase` and re-checked by `AuthManager.ensureSeedAdmin`. `AdminActivity` lets the admin create/delete users and assign/remove geofence pins; non-admins are blocked.
+
 ## 7. Core Logic
 
 ### Geofence evaluation
@@ -259,6 +275,18 @@ The project includes three useful test levels:
 - Validate database inserts and queries
 - Validate session and transition persistence
 - Validate latest-session result behavior
+- Validate pin insert/delete scoped to a user (`PinProviderTest`)
+
+### Account tests
+
+`AuthManagerTest` covers the accounts system:
+
+- the seed admin is created and can log in with admin role
+- sign up, log in, and log out work for a regular user
+- duplicate usernames and short passwords are rejected
+- wrong passwords are rejected
+- a regular user is not treated as admin
+- `restoreSession` re-hydrates a logged-in user after a simulated process restart
 
 ### UI flow tests
 

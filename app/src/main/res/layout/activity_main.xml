@@ -52,10 +52,56 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="Make sure location is allowed before starting tracking."
+                android:text="@string/main_auth_hint"
                 android:textColor="#5B747A"
                 android:textSize="14sp" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/authStateText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:textColor="#5B747A"
+            android:textSize="14sp"
+            tools:text="@string/main_auth_guest" />
+
+        <Button
+            android:id="@+id/loginButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/button_primary"
+            android:text="@string/main_login"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/signupButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/button_secondary"
+            android:text="@string/main_signup"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/logoutButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/button_secondary"
+            android:text="@string/main_logout"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/adminButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/button_primary"
+            android:text="@string/main_admin"
+            android:textColor="#FFFFFF" />
 
         <Button
             android:id="@+id/openMapButton"

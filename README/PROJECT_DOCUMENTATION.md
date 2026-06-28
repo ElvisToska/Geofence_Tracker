@@ -250,6 +250,44 @@ Fields:
 - `type`
 - `created_at`
 
+### Users
+
+Stores accounts for authentication and authorization.
+
+Fields:
+
+- `_ID`
+- `username` (unique)
+- `password_hash` (PBKDF2-WithHmacSHA256, 12000 iterations)
+- `password_salt` (per-user random salt)
+- `auth_token` (issued on login, cleared on logout)
+- `role` (`admin`, `user`, or `guest`)
+- `created_at`
+
+### Pins
+
+Admin-managed geofence pins assigned to a user.
+
+Fields:
+
+- `_ID`
+- `username` (owner)
+- `label`
+- `latitude`
+- `longitude`
+- `radius_meters`
+- `active`
+- `created_at`
+
+## Accounts & Administration
+
+The app has a username/password account system.
+
+- **Sign up / Log in** — `SignupActivity` and `LoginActivity` share `activity_auth.xml`. Sign-up requires a non-empty username and a password of at least 6 characters; passwords are stored only as a salted PBKDF2 hash (`PasswordHasher`). A successful login issues a random `auth_token`, persists it in `AppPrefs`, and sets the in-memory `AuthSession`.
+- **Session handling** — `AuthSession` holds the current username/token in memory. `AuthManager.restoreSession` re-hydrates it from `AppPrefs` on app start (in `MainActivity`) so the session survives a process restart. `GeofenceProvider` scopes every query/insert to `AuthSession.username()`, so each user only sees their own sessions, areas, transitions, and pins.
+- **Admin account** — A seed admin (`admin1404` / `admin1404`, role `admin`) is created both in `GeofenceDatabase.onCreate` and defensively via `AuthManager.ensureSeedAdmin`. Only an admin sees a working **Admin panel** button (guarded by `AuthManager.isAdmin`).
+- **Admin panel** — `AdminActivity` (`activity_admin.xml`) lets an admin add/delete users and add/remove geofence pins for a target user, and lists all users with their roles. Non-admins are rejected with a toast and the screen finishes.
+
 ## Application Flow
 
 ```mermaid
