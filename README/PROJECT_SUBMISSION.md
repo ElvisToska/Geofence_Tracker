@@ -66,6 +66,9 @@ flowchart TB
     Utils["PermissionUtils / GeoMath / ServiceStarter"]
 
     User --> Main
+    Main --> Login["LoginActivity"]
+    Main --> Signup["SignupActivity"]
+    Main --> Admin["AdminActivity"]
     Main --> Map
     Main --> Results
     Map --> Service
@@ -226,22 +229,24 @@ Implements distance calculation using the Haversine formula.
 
 ### 5.1 Sessions
 
-Represents a tracking run.
+Represents a tracking run, scoped to one user.
 
 Fields:
 
 - `_ID`
+- `username` (owner — foreign key to users)
 - `started_at`
 - `ended_at`
 - `active`
 
 ### 5.2 Areas
 
-Represents a geofence circle linked to a session.
+Represents a geofence circle linked to a session. Scoped to the owning user.
 
 Fields:
 
 - `_ID`
+- `username` (owner — foreign key to users)
 - `session_id`
 - `latitude`
 - `longitude`
@@ -249,26 +254,40 @@ Fields:
 
 ### 5.3 Transitions
 
-Represents an enter or exit event.
+Represents an enter or exit event. Scoped to the owning user.
 
 Fields:
 
 - `_ID`
+- `username` (owner — foreign key to users)
 - `session_id`
 - `area_id`
 - `latitude`
 - `longitude`
-- `type`
+- `type` (ENTER or EXIT)
 - `created_at`
 
 ```mermaid
 erDiagram
+    USERS ||--o{ SESSIONS : owns
+    USERS ||--o{ PINS : assigned
     SESSIONS ||--o{ AREAS : contains
     SESSIONS ||--o{ TRANSITIONS : records
     AREAS ||--o{ TRANSITIONS : relates_to
 
+    USERS {
+        int _id
+        string username
+        string password_hash
+        string password_salt
+        string auth_token
+        string role
+        long created_at
+    }
+
     SESSIONS {
         int _id
+        string username
         long started_at
         long ended_at
         int active
@@ -276,6 +295,7 @@ erDiagram
 
     AREAS {
         int _id
+        string username
         int session_id
         double latitude
         double longitude
@@ -284,6 +304,7 @@ erDiagram
 
     TRANSITIONS {
         int _id
+        string username
         int session_id
         int area_id
         double latitude
@@ -291,25 +312,72 @@ erDiagram
         string type
         long created_at
     }
+
+    PINS {
+        int _id
+        string username
+        string label
+        double latitude
+        double longitude
+        double radius_meters
+        int active
+        long created_at
+    }
 ```
+
+All data tables include a `username` column (foreign key to users) for per-user data isolation. The `GeofenceProvider` automatically filters every query and insert by the current user's username.
 
 ### 5.4 Users
 
-Stores accounts. Fields: `_ID`, `username` (unique), `password_hash`, `password_salt`, `auth_token`, `role` (`admin`/`user`/`guest`), `created_at`. Passwords are stored only as a salted PBKDF2 hash.
+Stores user accounts with hashed passwords and role-based access.
+
+Fields: `_ID`, `username` (unique), `password_hash` (PBKDF2-WithHmacSHA256, 12,000 iterations, 256-bit key), `password_salt` (per-user 16-byte random salt), `auth_token` (issued on login, cleared on logout), `role` (`admin`/`user`/`guest`), `created_at`.
+
+Passwords are never stored in plaintext.
 
 ### 5.5 Pins
 
-Admin-assigned geofence points. Fields: `_ID`, `username` (owner), `label`, `latitude`, `longitude`, `radius_meters`, `active`, `created_at`.
+Admin-assigned geofence points scoped to a specific user.
+
+Fields: `_ID`, `username` (owner), `label`, `latitude`, `longitude`, `radius_meters`, `active`, `created_at`.
 
 ### 5.6 Accounts and Administration
 
 The application provides a username/password account system layered over the content provider.
 
-- `SignupActivity` / `LoginActivity` handle registration and login through `AuthManager` and `PasswordHasher`.
-- `AuthSession` holds the current user in memory; `AuthManager.restoreSession` re-loads it from `AppPrefs` on startup so data stays scoped to the correct user across process restarts.
-- `GeofenceProvider` filters every record by the logged-in username, isolating each user's data.
-- A seed administrator (`admin1404` / `admin1404`, role `admin`) is created by `GeofenceDatabase` and verified by `AuthManager.ensureSeedAdmin`.
-- `AdminActivity` is the administration screen: it adds/deletes users, assigns/removes geofence pins for a user, and lists all accounts. It is reachable only when the logged-in user has the admin role.
+- **Signup** — `SignupActivity` uses its own layout (`activity_signup.xml`) with a password confirmation field. Validates that passwords match before registration. Includes a "Already have an account? Log in" navigation link.
+- **Login** — `LoginActivity` authenticates via `AuthManager.login()`, which verifies the password hash and issues a random auth token (UUID + SecureRandom). Includes a "Don't have an account? Sign up" navigation link.
+- **Session persistence** — `AuthSession` holds the current user in memory; `AuthManager.restoreSession` re-loads it from `AppPrefs` (SharedPreferences) on app start and resume, so data stays scoped to the correct user across process restarts.
+- **Button visibility** — `MainActivity` dynamically toggles buttons: guests see Log In + Sign Up; regular users see Log Out only; admins see Log Out + Admin Panel. Updates on login, logout, and `onResume`.
+- **Data isolation** — `GeofenceProvider` filters every record by the logged-in username, isolating each user's sessions, areas, transitions, and pins.
+- **Admin account** — A seed administrator (`admin1404` / `admin1404`, role `admin`) is created by `GeofenceDatabase.seedAdmin` and verified by `AuthManager.ensureSeedAdmin` on every launch.
+- **Admin panel** — `AdminActivity` provides full administration:
+  - Add new user accounts
+  - Delete users (admin self-deletion is blocked with a safety guard)
+  - Reset any user's password (generates new salt + hash, clears auth token to force re-login)
+  - Add/remove geofence pins for a target user
+  - View all users with roles and pin counts (e.g., "admin1404 (admin) — 0 pins")
+  - Non-admins are rejected with a toast and `finish()`
+
+### 5.7 Database Migration
+
+The database uses incremental `ALTER TABLE` migrations to preserve existing data:
+
+- **v1 → v2**: Creates `users` and `pins` tables; adds `username` column to `sessions`, `areas`, and `transitions` (existing rows default to `'guest'`)
+- **v2 → v3**: Re-seeds admin account to ensure it exists after migration
+
+Uses `PRAGMA table_info()` to check column existence before altering. No data is lost during upgrades.
+
+### 5.8 Logging
+
+All Java files include `android.util.Log` calls with proper tags and levels:
+
+- `Log.i` — important events: login, logout, signup, session creation, ENTER/EXIT transitions, service start/stop, GPS changes, DB migrations, user/pin management
+- `Log.d` — debug info: activity lifecycle, camera moves, area toggles, location processing
+- `Log.w` — warnings: failed auth, blocked admin deletion, missing permissions
+- `Log.e` — errors: password hashing failures
+
+Filter with: `adb logcat -s AuthManager GeofenceProvider GeofenceTrackingService MainActivity AdminActivity`
 
 ---
 
@@ -418,58 +486,54 @@ flowchart TD
 
 ## Chapter 7. Testing
 
-The project includes:
+The project includes **20 tests** across four categories: 16 instrumentation tests (require emulator or device) and 4 unit tests (run on JVM).
 
-- unit tests for math logic
-- provider tests for database behavior
-- instrumentation tests for emulator-based flow validation
+### 7.1 Unit Tests — 4 tests
 
-### 7.1 Unit Tests
+**`GeoMathTest`** — validates the Haversine distance calculation:
 
-- `GeoMathTest`
+1. Same-point distance is zero
+2. Athens-to-Piraeus distance is approximately 8.5 km
+3. Distance is symmetric (A→B equals B→A)
+4. 100-meter threshold boundary behavior
 
-Validates:
+### 7.2 Account Tests — 8 tests
 
-- same-point distance
-- symmetry
-- approximate threshold behavior
+**`AuthManagerTest`** — validates the authentication system:
 
-### 7.2 Provider Tests
+1. Seed admin account is created and can log in with admin role
+2. Signup, login, and logout work correctly for a regular user
+3. `restoreSession` re-hydrates a logged-in user after a simulated process restart
+4. Wrong password is rejected on login
+5. Short password (under 6 characters) is rejected on signup
+6. A regular user is not granted admin access
+7. Duplicate usernames are rejected on signup
+8. ContentProvider correctly stores and retrieves user records by username
 
-- `GeofenceProviderTest`
-- `PinProviderTest`
+### 7.3 Provider Tests — 5 tests
 
-Validates:
+**`GeofenceProviderTest`** — validates database operations:
 
-- session insertion
-- area insertion
-- transition insertion
-- latest session queries
-- repeated movement behavior
-- pin insert/delete scoped to a user
+1. Session and area insert; current areas query returns correct data
+2. 5-transition movement sequence; last queries return correct areas and transitions
+3. Repeated same-side movements are stored without errors
+4. Latest session is what results queries return (multi-session test)
+5. Transition insert with enter and exit points
 
-### 7.3 Account Tests
+**`PinProviderTest`** — validates pin management:
 
-- `AuthManagerTest`
+1. Pin insert and delete scoped to a specific user
 
-Validates:
+### 7.4 UI Flow Tests — 3 tests
 
-- the seed admin account exists and can log in with admin role
-- sign up, log in, and log out for a regular user
-- rejection of duplicate usernames, short passwords, and wrong passwords
-- a regular user is not granted admin access
-- session restore after a simulated process restart
+**`ResultsMapActivityTest`**:
 
-### 7.4 UI Flow Tests
+1. Results screen launches with seeded multi-session data, shows the correct (latest) session
 
-- `ResultsMapActivityTest`
-- `AppFlowResultsUiTest`
+**`AppFlowResultsUiTest`**:
 
-Validates:
-
-- opening the results screen from the main flow
-- visible UI state
-- latest session data availability
+1. Main screen "View Results" button navigates to results screen with logged-in user
+2. Latest session data is visible in results query after navigation
 
 ---
 

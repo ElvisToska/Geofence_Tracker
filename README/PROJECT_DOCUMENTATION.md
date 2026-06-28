@@ -31,7 +31,7 @@ At a high level:
 
 File:
 
-- [MainActivity.java](C:\Users\elvis\AndroidStudioProjects\android-geofence-java\app\src\main\java\com\example\geofenceapp\MainActivity.java)
+- [MainActivity.java](app\src\main\java\com\example\geofenceapp\MainActivity.java)
 
 What it does:
 
@@ -45,7 +45,7 @@ What it does:
 
 File:
 
-- [MapActivity.java](C:\Users\elvis\AndroidStudioProjects\android-geofence-java\app\src\main\java\com\example\geofenceapp\MapActivity.java)
+- [MapActivity.java](app\src\main\java\com\example\geofenceapp\MapActivity.java)
 
 What it does:
 
@@ -59,7 +59,7 @@ What it does:
 
 File:
 
-- [ResultsMapActivity.java](C:\Users\elvis\AndroidStudioProjects\android-geofence-java\app\src\main\java\com\example\geofenceapp\ResultsMapActivity.java)
+- [ResultsMapActivity.java](app\src\main\java\com\example\geofenceapp\ResultsMapActivity.java)
 
 What it does:
 
@@ -74,7 +74,7 @@ What it does:
 
 File:
 
-- [GeofenceTrackingService.java](C:\Users\elvis\AndroidStudioProjects\android-geofence-java\app\src\main\java\com\example\geofenceapp\location\GeofenceTrackingService.java)
+- [GeofenceTrackingService.java](app\src\main\java\com\example\geofenceapp\location\GeofenceTrackingService.java)
 
 What it does:
 
@@ -89,7 +89,7 @@ What it does:
 
 File:
 
-- [ServiceStarter.java](C:\Users\elvis\AndroidStudioProjects\android-geofence-java\app\src\main\java\com\example\geofenceapp\location\ServiceStarter.java)
+- [ServiceStarter.java](app\src\main\java\com\example\geofenceapp\location\ServiceStarter.java)
 
 What it does:
 
@@ -101,7 +101,7 @@ What it does:
 
 File:
 
-- [GpsStatusReceiver.java](C:\Users\elvis\AndroidStudioProjects\android-geofence-java\app\src\main\java\com\example\geofenceapp\location\GpsStatusReceiver.java)
+- [GpsStatusReceiver.java](app\src\main\java\com\example\geofenceapp\location\GpsStatusReceiver.java)
 
 What it does:
 
@@ -113,7 +113,7 @@ What it does:
 
 File:
 
-- [GeofenceProvider.java](C:\Users\elvis\AndroidStudioProjects\android-geofence-java\app\src\main\java\com\example\geofenceapp\data\GeofenceProvider.java)
+- [GeofenceProvider.java](app\src\main\java\com\example\geofenceapp\data\GeofenceProvider.java)
 
 What it does:
 
@@ -131,7 +131,7 @@ What it does:
 
 File:
 
-- [GeofenceDatabase.java](C:\Users\elvis\AndroidStudioProjects\android-geofence-java\app\src\main\java\com\example\geofenceapp\data\GeofenceDatabase.java)
+- [GeofenceDatabase.java](app\src\main\java\com\example\geofenceapp\data\GeofenceDatabase.java)
 
 What it does:
 
@@ -143,7 +143,7 @@ What it does:
 
 File:
 
-- [GeofenceContract.java](C:\Users\elvis\AndroidStudioProjects\android-geofence-java\app\src\main\java\com\example\geofenceapp\data\GeofenceContract.java)
+- [GeofenceContract.java](app\src\main\java\com\example\geofenceapp\data\GeofenceContract.java)
 
 What it does:
 
@@ -155,7 +155,7 @@ What it does:
 
 File:
 
-- [AppPrefs.java](C:\Users\elvis\AndroidStudioProjects\android-geofence-java\app\src\main\java\com\example\geofenceapp\util\AppPrefs.java)
+- [AppPrefs.java](app\src\main\java\com\example\geofenceapp\util\AppPrefs.java)
 
 What it does:
 
@@ -167,7 +167,7 @@ What it does:
 
 File:
 
-- [PermissionUtils.java](C:\Users\elvis\AndroidStudioProjects\android-geofence-java\app\src\main\java\com\example\geofenceapp\util\PermissionUtils.java)
+- [PermissionUtils.java](app\src\main\java\com\example\geofenceapp\util\PermissionUtils.java)
 
 What it does:
 
@@ -177,15 +177,79 @@ What it does:
 
 ### `GeoMath`
 
-File:
-
-- [GeoMath.java](C:\Users\elvis\AndroidStudioProjects\android-geofence-java\app\src\main\java\com\example\geofenceapp\util\GeoMath.java)
+File: `app/src/main/java/com/example/geofenceapp/util/GeoMath.java`
 
 What it does:
 
 - Implements the Haversine formula
 - Computes distance in meters between two coordinates
 - Powers the inside/outside geofence checks
+
+### `AuthManager`
+
+File: `app/src/main/java/com/example/geofenceapp/util/AuthManager.java`
+
+What it does:
+
+- Central authentication controller
+- Handles signup (with validation), login (with token generation), and logout
+- Seeds the default admin account on first launch
+- Restores the in-memory session from SharedPreferences after a process restart
+- Checks whether the current user has the admin role
+
+### `AuthSession`
+
+File: `app/src/main/java/com/example/geofenceapp/util/AuthSession.java`
+
+What it does:
+
+- Holds the currently logged-in user's username and token in static fields
+- Used by GeofenceProvider to scope all database queries to the current user
+- Cleared on logout, restored from SharedPreferences on app restart
+
+### `PasswordHasher`
+
+File: `app/src/main/java/com/example/geofenceapp/util/PasswordHasher.java`
+
+What it does:
+
+- Hashes passwords using PBKDF2-WithHmacSHA256 (12,000 iterations, 256-bit key)
+- Generates cryptographically secure 16-byte random salts
+- Verifies a plaintext password against a stored salt and hash
+
+### `LoginActivity`
+
+File: `app/src/main/java/com/example/geofenceapp/LoginActivity.java`
+
+What it does:
+
+- Shows the login form (username + password)
+- Authenticates via AuthManager.login()
+- Includes a "Don't have an account? Sign up" navigation link
+- Shows error message on failed login
+
+### `SignupActivity`
+
+File: `app/src/main/java/com/example/geofenceapp/SignupActivity.java`
+
+What it does:
+
+- Shows the signup form (username + password + confirm password)
+- Validates that passwords match before calling AuthManager.signUp()
+- Auto-logs in after successful registration
+- Includes an "Already have an account? Log in" navigation link
+
+### `AdminActivity`
+
+File: `app/src/main/java/com/example/geofenceapp/AdminActivity.java`
+
+What it does:
+
+- Admin-only screen for user and pin management
+- Blocks non-admin users with a toast and finish()
+- Manages users: add, delete (admin self-deletion blocked), reset password
+- Manages pins: add/remove geofence pins assigned to a target user
+- Displays user list with roles and pin counts
 
 ## UI Screens
 
@@ -215,22 +279,24 @@ Purpose:
 
 ### Sessions
 
-Stores tracking runs.
+Stores tracking runs. Each session is scoped to one user.
 
 Fields:
 
 - `_ID`
+- `username` (owner — foreign key to users)
 - `started_at`
 - `ended_at`
 - `active`
 
 ### Areas
 
-Stores the geofence circles selected for a session.
+Stores the geofence circles selected for a session. Scoped to the owning user.
 
 Fields:
 
 - `_ID`
+- `username` (owner — foreign key to users)
 - `session_id`
 - `latitude`
 - `longitude`
@@ -238,16 +304,17 @@ Fields:
 
 ### Transitions
 
-Stores entry and exit points.
+Stores entry and exit points. Scoped to the owning user.
 
 Fields:
 
 - `_ID`
+- `username` (owner — foreign key to users)
 - `session_id`
 - `area_id`
 - `latitude`
 - `longitude`
-- `type`
+- `type` (ENTER or EXIT)
 - `created_at`
 
 ### Users
@@ -283,10 +350,18 @@ Fields:
 
 The app has a username/password account system.
 
-- **Sign up / Log in** — `SignupActivity` and `LoginActivity` share `activity_auth.xml`. Sign-up requires a non-empty username and a password of at least 6 characters; passwords are stored only as a salted PBKDF2 hash (`PasswordHasher`). A successful login issues a random `auth_token`, persists it in `AppPrefs`, and sets the in-memory `AuthSession`.
+- **Sign up / Log in** — `SignupActivity` uses its own `activity_signup.xml` layout with a password confirmation field; `LoginActivity` uses `activity_auth.xml`. Both screens include navigation links ("Already have an account? Log in" / "Don't have an account? Sign up") to switch between them. Sign-up requires a non-empty username and a password of at least 6 characters; passwords are stored only as a salted PBKDF2-WithHmacSHA256 hash (12,000 iterations, 256-bit key, 16-byte random salt via `PasswordHasher`). A successful login issues a random `auth_token` (UUID + SecureRandom), persists it in `AppPrefs`, and sets the in-memory `AuthSession`.
 - **Session handling** — `AuthSession` holds the current username/token in memory. `AuthManager.restoreSession` re-hydrates it from `AppPrefs` on app start (in `MainActivity`) so the session survives a process restart. `GeofenceProvider` scopes every query/insert to `AuthSession.username()`, so each user only sees their own sessions, areas, transitions, and pins.
+- **Button visibility** — `MainActivity` dynamically shows/hides auth buttons based on login state. Guests see Log In + Sign Up; logged-in users see Log Out; admins additionally see the Admin Panel button. This updates on login, logout, and when returning from other screens (in `onResume`).
 - **Admin account** — A seed admin (`admin1404` / `admin1404`, role `admin`) is created both in `GeofenceDatabase.onCreate` and defensively via `AuthManager.ensureSeedAdmin`. Only an admin sees a working **Admin panel** button (guarded by `AuthManager.isAdmin`).
-- **Admin panel** — `AdminActivity` (`activity_admin.xml`) lets an admin add/delete users and add/remove geofence pins for a target user, and lists all users with their roles. Non-admins are rejected with a toast and the screen finishes.
+- **Admin panel** — `AdminActivity` (`activity_admin.xml`) lets an admin:
+  - Add new user accounts
+  - Delete user accounts (with a safety guard that prevents deleting the admin account)
+  - Reset any user's password (generates new salt and hash, clears their auth token to force re-login)
+  - Add/remove geofence pins assigned to a target user
+  - View all users with their roles and pin counts (e.g., "admin1404 (admin) — 0 pins")
+  - View detailed pin list (label, coordinates, radius) for a target user
+  - Non-admins are rejected with a toast and the screen finishes.
 
 ## Application Flow
 
@@ -411,26 +486,74 @@ flowchart TD
     G --> H["Results screen queries latest session"]
 ```
 
+## Database Migration Strategy
+
+The database uses incremental `ALTER TABLE` migrations instead of dropping and recreating tables, so existing user data is preserved across app updates.
+
+Version history:
+- **Version 1**: Initial schema (sessions, areas, transitions)
+- **Version 2**: Added `users` and `pins` tables; added `username` column to sessions, areas, and transitions via `ALTER TABLE` (existing rows default to `'guest'`)
+- **Version 3**: Re-seeds the admin account to ensure it exists after migrations
+
+The `addUsernameColumnIfMissing()` method uses `PRAGMA table_info()` to inspect the current schema before altering, making migrations safe to re-run.
+
+## Logging
+
+All Java files include `android.util.Log` calls with proper log tags and levels:
+
+- `Log.i` (info): login, logout, signup, session creation, ENTER/EXIT transitions, service start/stop, GPS state changes, DB migrations, user/pin management
+- `Log.d` (debug): activity lifecycle (`onCreate`), camera moves, area add/remove, location processing
+- `Log.w` (warning): failed login, rejected signup (duplicate, short password), blocked admin self-deletion, missing permissions
+- `Log.e` (error): password hashing failures
+
+Each class uses a `TAG` constant matching its class name. Filter logs with:
+
+```
+adb logcat -s AuthManager GeofenceProvider GeofenceTrackingService MainActivity AdminActivity LoginActivity SignupActivity GpsStatusReceiver ServiceStarter GeofenceDatabase
+```
+
 ## Testing Coverage
 
-### Unit Tests
+**20 tests total** — 16 instrumentation tests (require emulator/device) + 4 unit tests (JVM).
+
+### Unit Tests (4)
 
 - `GeoMathTest`
-- Verifies distance calculations, symmetry, and threshold behavior
+  - same-point distance is zero
+  - Athens-to-Piraeus distance is approximately 8.5 km
+  - distance calculation is symmetric
+  - 100-meter threshold boundary behavior
 
-### Provider / Instrumentation Tests
+### Account Tests (8)
+
+- `AuthManagerTest`
+  - seed admin account is created and can log in with admin role
+  - signup, login, and logout work for a regular user
+  - `restoreSession` re-hydrates a logged-in user after a simulated process restart
+  - wrong password is rejected
+  - short password (under 6 chars) is rejected
+  - regular user is not granted admin access
+  - duplicate usernames are rejected
+  - provider correctly stores and retrieves user records
+
+### Provider Tests (5)
 
 - `GeofenceProviderTest`
-- Verifies provider inserts and latest-session queries
-- Verifies movement sequences and repeated same-side movement behavior
-- Verifies the latest session data is what results queries return
+  - session and area insert, current areas query
+  - movement sequence with 5 transitions, last queries return correct data
+  - repeated same-side movements do not produce incorrect counts
+  - latest session is what results queries return (multi-session test)
+  - transition insert with enter and exit points
+- `PinProviderTest`
+  - pin insert and delete scoped to a specific user
 
-### UI / App Flow Tests
+### UI / App Flow Tests (3)
 
 - `ResultsMapActivityTest`
+  - results screen launches with seeded multi-session data, shows correct session
 - `AppFlowResultsUiTest`
-- Verifies the main navigation flow into the results screen
-- Verifies visible UI state and latest-session data together
+  - main screen → results screen navigation with login
+  - latest session data is visible in results
 
 ## Runtime Requirements
 
